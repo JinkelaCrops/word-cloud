@@ -37,7 +37,7 @@ def word_freq(k, ks):
 
 with open("./text/lans_en.txt", "r", encoding="utf8") as f:
     text = f.readlines()
-text = text
+text = text * 100
 text = [[x.strip(), word_freq(k, len(text))] for k, x in enumerate(text)]
 
 
