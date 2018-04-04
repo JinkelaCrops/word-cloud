@@ -33,21 +33,21 @@ aaa = aa(text)
 
 mask_pic = np.array(Image.open(mask_path))[:, :, :3]
 
-mask_pic_2 = cv2.resize(mask_pic, (mask_pic.shape[1] * 8, mask_pic.shape[0] * 8))
+mask_pic_2 = cv2.resize(mask_pic, (mask_pic.shape[1] * 8, mask_pic.shape[0] * 8))  # resize mask
 
 wc = WordCloud(font_path=font_path,
                prefer_horizontal=1,
                background_color="white",
                mask=mask_pic_2,
-               max_font_size=600,     # max word size
+               max_font_size=600,  # max word size, should be larger when mask is larger
                random_state=80, margin=0,
-               max_words=5000,        # more words
+               max_words=5000,  # more words
                width=100, height=100  # useless when use mask
                )
 # generate word cloud
 wc.generate_from_frequencies(aaa)
 
-plt.figure(figsize=(30, 30))   # larger, better quality
+plt.figure(figsize=(30, 30))  # larger, better quality
 plt.imshow(wc)
 plt.axis("off")
 plt.savefig("word_graph4.png")
