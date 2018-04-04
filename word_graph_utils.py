@@ -33,7 +33,7 @@ aaa = aa(text)
 
 mask_pic = np.array(Image.open(mask_path))
 
-mask_pic_2 = cv2.resize(mask_pic, (mask_pic.shape[1] * 10, mask_pic.shape[0] * 10))
+mask_pic_2 = cv2.resize(mask_pic, (mask_pic.shape[1] * 3, mask_pic.shape[0] * 3))
 
 wc = WordCloud(font_path=font_path,
                prefer_horizontal=1,
