@@ -9,6 +9,27 @@ plt.switch_backend('agg')
 font_path = "./fonts/Griffy-Regular.ttf"
 mask_path = "./backgrounds/cat.png"
 
+from random import Random
+
+
+class colormap_color_func(object):
+
+    def __init__(self):
+        import matplotlib.pyplot as plt
+        self.colormap = plt.cm.get_cmap("viridis")
+
+    def __call__(self, word, font_size, position, orientation,
+                 random_state=None, **kwargs):
+        if random_state is None:
+            random_state = Random()
+        if word == "English":
+            cc = "87CEEB"
+            r, g, b = int("0x%s" % cc[:2], 16), int("0x%s" % cc[2:4], 16), int("0x%s" % cc[4:], 16)
+        else:
+            r, g, b, _ = np.maximum(0, 255 * np.array(self.colormap(
+                random_state.uniform(0, 1))))
+        return "rgb({:.0f}, {:.0f}, {:.0f})".format(r, g, b)
+
 
 def word_freq(k, ks):
     return (ks - k) ** 0
@@ -16,7 +37,7 @@ def word_freq(k, ks):
 
 with open("./text/lans_en.txt", "r", encoding="utf8") as f:
     text = f.readlines()
-text = text * 100
+text = text
 text = [[x.strip(), word_freq(k, len(text))] for k, x in enumerate(text)]
 
 
@@ -47,8 +68,10 @@ wc = WordCloud(font_path=font_path,
 # generate word cloud
 wc.generate_from_frequencies(aaa)
 
+wc.recolor(color_func=colormap_color_func())
+
 plt.figure(figsize=(30, 30))  # larger, better quality
 plt.imshow(wc)
 plt.axis("off")
-plt.savefig("word_graph4.png")
+plt.savefig("word_graph3.png")
 plt.show()
