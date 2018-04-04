@@ -1,8 +1,10 @@
 from wordcloud import WordCloud
+import cv2
 from os import path
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
+
 plt.switch_backend('agg')
 font_path = "./fonts/Griffy-Regular.ttf"
 mask_path = "./backgrounds/cat.png"
@@ -30,13 +32,16 @@ class aa:
 aaa = aa(text)
 
 mask_pic = np.array(Image.open(mask_path))
+
+mask_pic_2 = cv2.resize(mask_pic, (mask_pic.shape[1] * 10, mask_pic.shape[0] * 10))
+
 wc = WordCloud(font_path=font_path,
                prefer_horizontal=1,
                background_color="white",
-               # mask=mask_pic,
+               mask=mask_pic_2,
                max_font_size=300, random_state=80, margin=0,
                max_words=2000,
-               width=2000, height=2000
+               width=1000, height=1000
                )
 # generate word cloud
 wc.generate_from_frequencies(aaa)
