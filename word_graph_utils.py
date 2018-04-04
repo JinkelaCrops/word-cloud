@@ -3,7 +3,7 @@ from os import path
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-
+plt.switch_backend('agg')
 font_path = "./fonts/Griffy-Regular.ttf"
 mask_path = "./backgrounds/cat.png"
 
