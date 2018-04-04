@@ -41,7 +41,7 @@ wc = WordCloud(font_path=font_path,
                mask=mask_pic_2,
                max_font_size=300, random_state=80, margin=0,
                max_words=5000,
-               width=3000, height=3000
+               width=100, height=100
                )
 # generate word cloud
 wc.generate_from_frequencies(aaa)
