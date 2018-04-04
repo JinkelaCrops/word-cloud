@@ -14,7 +14,7 @@ def word_freq(k, ks):
 
 with open("./text/lans_en.txt", "r", encoding="utf8") as f:
     text = f.readlines()
-text = text * 1000
+text = text * 10000
 text = [[x.strip(), word_freq(k, len(text))] for k, x in enumerate(text)]
 
 
@@ -34,7 +34,7 @@ wc = WordCloud(font_path=font_path,
                prefer_horizontal=1,
                background_color="white", mask=mask_pic,
                max_font_size=1000, random_state=80, margin=0,
-               max_words=20000,
+               max_words=200000,
                width=1000, height=1000
                )
 # generate word cloud
