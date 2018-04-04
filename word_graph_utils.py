@@ -39,9 +39,9 @@ wc = WordCloud(font_path=font_path,
                prefer_horizontal=1,
                background_color="white",
                mask=mask_pic_2,
-               max_font_size=600,  # max word size, should be larger when mask is larger
+               max_font_size=700,  # max word size, should be larger when mask is larger
                random_state=80, margin=0,
-               max_words=5000,  # more words
+               max_words=500,  # more words
                width=100, height=100  # useless when use mask
                )
 # generate word cloud
