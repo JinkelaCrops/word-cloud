@@ -33,8 +33,8 @@ mask_pic = np.array(Image.open(mask_path))
 wc = WordCloud(font_path=font_path,
                prefer_horizontal=1,
                background_color="white",
-               mask=mask_pic,
-               max_font_size=300, random_state=80, margin=2,
+               # mask=mask_pic,
+               max_font_size=300, random_state=80, margin=0,
                max_words=2000,
                width=10000, height=10000
                )
