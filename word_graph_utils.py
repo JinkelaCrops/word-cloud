@@ -16,7 +16,7 @@ def word_freq(k, ks):
 
 with open("./text/lans_en.txt", "r", encoding="utf8") as f:
     text = f.readlines()
-text = text * 200
+text = text * 100
 text = [[x.strip(), word_freq(k, len(text))] for k, x in enumerate(text)]
 
 
@@ -31,22 +31,23 @@ class aa:
 
 aaa = aa(text)
 
-mask_pic = np.array(Image.open(mask_path))
+mask_pic = np.array(Image.open(mask_path))[:, :, :3]
 
-mask_pic_2 = cv2.resize(mask_pic, (mask_pic.shape[1] * 5, mask_pic.shape[0] * 5))
+mask_pic_2 = cv2.resize(mask_pic, (mask_pic.shape[1] * 8, mask_pic.shape[0] * 8))
 
 wc = WordCloud(font_path=font_path,
                prefer_horizontal=1,
                background_color="white",
                mask=mask_pic_2,
-               max_font_size=300, random_state=80, margin=0,
-               max_words=5000,
-               width=100, height=100
+               max_font_size=600,     # max word size
+               random_state=80, margin=0,
+               max_words=5000,        # more words
+               width=100, height=100  # useless when use mask
                )
 # generate word cloud
 wc.generate_from_frequencies(aaa)
 
-plt.figure(figsize=(10, 10))
+plt.figure(figsize=(30, 30))   # larger, better quality
 plt.imshow(wc)
 plt.axis("off")
 plt.savefig("word_graph4.png")
