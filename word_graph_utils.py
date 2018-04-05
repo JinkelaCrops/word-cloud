@@ -39,6 +39,16 @@ def maxmin_fig(mask):
     return mm.astype("uint8")
 
 
+def square_fig(mask):
+    x, y, _ = mask.shape
+    if x < y:
+        mar = int((y - x) / 2)
+        return cv2.copyMakeBorder(mask, mar, mar, 0, 0, cv2.BORDER_REFLECT)
+    else:
+        mar = int((x - y) / 2)
+        return cv2.copyMakeBorder(mask, 0, 0, mar, mar, cv2.BORDER_REFLECT)
+
+
 class colormap_color_func(object):
 
     def __init__(self, word_color_map):
@@ -79,13 +89,18 @@ if __name__ == '__main__':
         line_data = line.strip().split()
         p_dict[line_data[0]] = {"color": line_data[1][1:], "fsize": int(line_data[2])}
 
-    text = gen_text(p_dict, 50)  # text times
+    text = gen_text(p_dict, 20)  # text times
     print("text length:", len(text), text[-1])
     text_items = gen_items(text)
 
     mask_pic = np.array(Image.open(mask_path))[:, :, :3]
     mask_pic_2 = cv2.resize(mask_pic, (mask_pic.shape[1] * 8, mask_pic.shape[0] * 8))  # resize mask
     mask_pic_2 = maxmin_fig(mask_pic_2)
+    mask_pic_2 = square_fig(mask_pic_2)
+    pad_size = 200
+    mar = int(pad_size / 2)
+    mask_pic_3 = cv2.resize(mask_pic_2, (mask_pic_2.shape[1] + pad_size, mask_pic_2.shape[0] + pad_size))
+    mask_pic_2 = cv2.dilate(mask_pic_3, np.ones((mar, mar), np.uint8), iterations=1)
 
     wc = WordCloud(font_path=font_path,
                    prefer_horizontal=1,
@@ -104,12 +119,12 @@ if __name__ == '__main__':
 
     ndwc = wc.to_array()
     mmm = np.array([np.mean(ndwc, axis=2) == 255] * 3).transpose((1, 2, 0))
-    back = mmm * (255 - mask_pic_2)
+    back = mmm * (255 - mask_pic_3)
     frnt = (~mmm) * ndwc
 
-    back[np.where(back > np.max(back) - 15)] = np.max(back) - 15
+    back[np.where(back > np.max(back) - 10)] = np.max(back) - 10
     plt.figure(figsize=(30, 30))  # larger, better quality
-    plt.imshow(back + frnt + mask_pic_2)
+    plt.imshow(back + frnt + mask_pic_3)
     plt.axis("off")
     plt.savefig("word_graph_back.png")
     plt.close()
