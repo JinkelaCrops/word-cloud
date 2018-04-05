@@ -8,7 +8,7 @@ from random import Random
 plt.switch_backend('agg')
 
 
-def gen_text_color(p_dict, times):
+def gen_text_color(p_dict, times, rep='\u0000'):
     sss = lambda s: (s - 20) ** 2
 
     s = np.array([j["fsize"] for n, j in p_dict.items()])
@@ -17,7 +17,7 @@ def gen_text_color(p_dict, times):
     color = {}
     for t in range(times):
         for n, j in p_dict.items():
-            nt = n + '\u0000' * t
+            nt = n + rep * t
             st = sss(j["fsize"]) if t == 0 else sm
             text[nt] = st
             color[nt] = j["color"]
@@ -82,48 +82,62 @@ if __name__ == '__main__':
     with open("./text/YiCAT词云参数.txt", "r", encoding="utf8") as f:
         params = f.readlines()
     p_dict = {}
+    # p_dict: {word index: {font size: , font color: }}
     for line in params:
         line_data = line.strip().split()
         p_dict[line_data[0]] = {"color": line_data[1][1:], "fsize": int(line_data[2])}
 
-    text_items, word_color_map = gen_text_color(p_dict, 20)  # text times
+    # gen text, color for times, 20
+    text_items, word_color_map = gen_text_color(p_dict, 20, rep="\u0000")
     print("text length:", len(text_items), list(text_items.items())[-1])
 
+    # mask input
     mask_pic = np.array(Image.open(mask_path))[:, :, :3]
-    mask_pic_2 = cv2.resize(mask_pic, (mask_pic.shape[1] * 8, mask_pic.shape[0] * 8))  # resize mask
-    mask_pic_2 = maxmin_fig(mask_pic_2)
-    mask_pic_2 = 255 - square_fig(255 - mask_pic_2)
+    # mask resize
+    mask_less = cv2.resize(mask_pic, (mask_pic.shape[1] * 8, mask_pic.shape[0] * 8))  # resize mask
+    mask_less = maxmin_fig(mask_less)
+    mask_less = 255 - square_fig(255 - mask_less)
+    # maskmore and maskless,
+    # maskmore(mask_more) is the background, maskless(mask_less) is the wordcloud
     pad_size = 100
     mar = int(pad_size / 2)
-    mask_pic_3 = cv2.resize(mask_pic_2, (mask_pic_2.shape[1] + pad_size, mask_pic_2.shape[0] + pad_size))
-    mask_pic_2 = cv2.dilate(mask_pic_3, np.ones((mar, mar), np.uint8), iterations=1)
+    mask_more = cv2.resize(mask_less, (mask_less.shape[1] + pad_size, mask_less.shape[0] + pad_size))
+    mask_less = cv2.dilate(mask_more, np.ones((mar, mar), np.uint8), iterations=1)
 
     wc = WordCloudPos(font_path=font_path,
                       prefer_horizontal=1,
                       background_color="white",
-                      mask=mask_pic_2,
+                      mask=mask_less,
                       max_font_size=300,  # 800 max word size, should be larger when mask is larger
                       random_state=80, margin=2,
                       max_words=500,  # more words
                       width=100, height=100  # useless when use mask
                       )
-    # generate word cloud
 
+    # user defined position
     userdefpos = {"English": (2211, 3059), "Chinese": (1916, 3878)}
 
+    # replacement for p_dict.index
     wc.set_word_replace("\u0000")
+
+    # generate word cloud
     wc.generate_from_frequencies_positions(text_items, userdefpos)
 
+    # recolor
     wc.recolor(color_func=colormap_color_func(word_color_map))
 
+    # generate back(background) from maskmore(mask_more)
+    # generate front(pure wordclouds)
     ndwc = wc.to_array()
     mmm = np.array([np.mean(ndwc, axis=2) == 255] * 3).transpose((1, 2, 0))
-    back = mmm * (255 - mask_pic_3)
+    back = mmm * (255 - mask_more)
     frnt = (~mmm) * ndwc
-
+    # background grey
     back[np.where(back > np.max(back) - 10)] = np.max(back) - 10
+
+    # plot
     plt.figure(figsize=(30, 30))  # larger, better quality
-    plt.imshow(back + frnt + mask_pic_3)
+    plt.imshow(back + frnt + mask_more)
     plt.axis("off")
     plt.savefig("word_graph1.png")
     plt.close()
