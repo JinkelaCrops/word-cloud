@@ -79,7 +79,7 @@ if __name__ == '__main__':
         line_data = line.strip().split()
         p_dict[line_data[0]] = {"color": line_data[1][1:], "fsize": int(line_data[2])}
 
-    text = gen_text(p_dict, 3)  # text times
+    text = gen_text(p_dict, 50)  # text times
     print("text length:", len(text), text[-1])
     text_items = gen_items(text)
 
