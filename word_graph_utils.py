@@ -88,11 +88,13 @@ if __name__ == '__main__':
         p_dict[line_data[0]] = {"color": line_data[1][1:], "fsize": int(line_data[2])}
 
     # gen text, color for times, 20
-    text_items, word_color_map = gen_text_color(p_dict, 20, rep="\u0000")
+    text_repeat_times = 20
+    text_items, word_color_map = gen_text_color(p_dict, text_repeat_times, rep="\u0000")
     print("text length:", len(text_items), list(text_items.items())[-1])
 
     # mask input
-    mask_pic = np.array(Image.open(mask_path))[:, :, :3]
+    mask_origin = np.array(Image.open(mask_path))
+    mask_pic = mask_origin[:, :, :3]
     # mask resize
     mask_less = cv2.resize(mask_pic, (mask_pic.shape[1] * 8, mask_pic.shape[0] * 8))  # resize mask
     mask_less = maxmin_fig(mask_less)
@@ -103,6 +105,7 @@ if __name__ == '__main__':
     mar = int(pad_size / 2)
     mask_more = cv2.resize(mask_less, (mask_less.shape[1] + pad_size, mask_less.shape[0] + pad_size))
     mask_less = cv2.dilate(mask_more, np.ones((mar, mar), np.uint8), iterations=1)
+    mask_transparent = cv2.resize(square_fig(mask_origin), (mask_more.shape[1], mask_more.shape[0]))[:, :, 3]
 
     wc = WordCloudPos(font_path=font_path,
                       prefer_horizontal=1,
@@ -137,7 +140,9 @@ if __name__ == '__main__':
 
     # plot
     plt.figure(figsize=(30, 30))  # larger, better quality
-    plt.imshow(back + frnt + mask_more)
+    bmp_fig = back + frnt + mask_more
+    png_fig = np.array([*bmp_fig.transpose((2, 0, 1)), mask_transparent]).transpose((1, 2, 0))
+    plt.imshow(png_fig)
     plt.axis("off")
     plt.savefig("word_graph1.png")
     plt.close()
