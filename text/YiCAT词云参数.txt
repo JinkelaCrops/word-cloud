@@ -1,8 +1,8 @@
-Korean #800080 25
-Russian #000000 25
+Korean #800080 26
+Russian #000000 26
 Japanese #000000 25
-English #87CEEB 26
-Chinese #FFA500 26
+English #87CEEB 25
+Chinese #FFA500 25
 German #E8A019 25
 Spanish #00008B 25
 Portuguese #731B1B 23
