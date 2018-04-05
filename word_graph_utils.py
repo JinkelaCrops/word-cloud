@@ -1,6 +1,5 @@
-from wordcloud import WordCloud
+from utils.wordcloudpos import WordCloudPos
 import cv2
-from os import path
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,22 +8,20 @@ from random import Random
 plt.switch_backend('agg')
 
 
-def gen_text(p_dict, times):
-    text = []
-    n = np.array(list(p_dict.keys()))
+def gen_text_color(p_dict, times):
+    sss = lambda s: (s - 20) ** 2
+
     s = np.array([j["fsize"] for n, j in p_dict.items()])
-    s = (s - 20) ** 2
-    # ratio = np.min(s) / np.max(s)
-    for t in range(times):
-        text += list(zip(n, s if t == 0 else (s > 0) * np.min(s)))
-    return text
-
-
-def gen_color(p_dict):
+    sm = np.min(sss(s))
+    text = {}
     color = {}
-    for n, j in p_dict.items():
-        color[n] = j["color"]
-    return color
+    for t in range(times):
+        for n, j in p_dict.items():
+            nt = n + '\u0000' * t
+            st = sss(j["fsize"]) if t == 0 else sm
+            text[nt] = st
+            color[nt] = j["color"]
+    return text, color
 
 
 def to_rgb(cc):
@@ -89,9 +86,8 @@ if __name__ == '__main__':
         line_data = line.strip().split()
         p_dict[line_data[0]] = {"color": line_data[1][1:], "fsize": int(line_data[2])}
 
-    text = gen_text(p_dict, 20)  # text times
-    print("text length:", len(text), text[-1])
-    text_items = gen_items(text)
+    text_items, word_color_map = gen_text_color(p_dict, 20)  # text times
+    print("text length:", len(text_items), list(text_items.items())[-1])
 
     mask_pic = np.array(Image.open(mask_path))[:, :, :3]
     mask_pic_2 = cv2.resize(mask_pic, (mask_pic.shape[1] * 8, mask_pic.shape[0] * 8))  # resize mask
@@ -102,19 +98,22 @@ if __name__ == '__main__':
     mask_pic_3 = cv2.resize(mask_pic_2, (mask_pic_2.shape[1] + pad_size, mask_pic_2.shape[0] + pad_size))
     mask_pic_2 = cv2.dilate(mask_pic_3, np.ones((mar, mar), np.uint8), iterations=1)
 
-    wc = WordCloud(font_path=font_path,
-                   prefer_horizontal=1,
-                   background_color="white",
-                   mask=mask_pic_2,
-                   max_font_size=300,  # 800 max word size, should be larger when mask is larger
-                   random_state=80, margin=0,
-                   max_words=500,  # more words
-                   width=100, height=100  # useless when use mask
-                   )
+    wc = WordCloudPos(font_path=font_path,
+                      prefer_horizontal=1,
+                      background_color="white",
+                      mask=mask_pic_2,
+                      max_font_size=300,  # 800 max word size, should be larger when mask is larger
+                      random_state=80, margin=2,
+                      max_words=500,  # more words
+                      width=100, height=100  # useless when use mask
+                      )
     # generate word cloud
-    wc.generate_from_frequencies(text_items)
 
-    word_color_map = gen_color(p_dict)
+    userdefpos = {"English": (2211, 3059), "Chinese": (1916, 3878)}
+
+    wc.set_word_replace("\u0000")
+    wc.generate_from_frequencies_positions(text_items, userdefpos)
+
     wc.recolor(color_func=colormap_color_func(word_color_map))
 
     ndwc = wc.to_array()
