@@ -43,10 +43,10 @@ def square_fig(mask):
     x, y, _ = mask.shape
     if x < y:
         mar = int((y - x) / 2)
-        return cv2.copyMakeBorder(mask, mar, mar, 0, 0, cv2.BORDER_REFLECT)
+        return cv2.copyMakeBorder(mask, mar, mar, 0, 0, cv2.BORDER_CONSTANT)
     else:
         mar = int((x - y) / 2)
-        return cv2.copyMakeBorder(mask, 0, 0, mar, mar, cv2.BORDER_REFLECT)
+        return cv2.copyMakeBorder(mask, 0, 0, mar, mar, cv2.BORDER_CONSTANT)
 
 
 class colormap_color_func(object):
@@ -96,8 +96,8 @@ if __name__ == '__main__':
     mask_pic = np.array(Image.open(mask_path))[:, :, :3]
     mask_pic_2 = cv2.resize(mask_pic, (mask_pic.shape[1] * 8, mask_pic.shape[0] * 8))  # resize mask
     mask_pic_2 = maxmin_fig(mask_pic_2)
-    mask_pic_2 = square_fig(mask_pic_2)
-    pad_size = 200
+    mask_pic_2 = 255 - square_fig(255 - mask_pic_2)
+    pad_size = 100
     mar = int(pad_size / 2)
     mask_pic_3 = cv2.resize(mask_pic_2, (mask_pic_2.shape[1] + pad_size, mask_pic_2.shape[0] + pad_size))
     mask_pic_2 = cv2.dilate(mask_pic_3, np.ones((mar, mar), np.uint8), iterations=1)
