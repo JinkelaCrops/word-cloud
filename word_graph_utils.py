@@ -126,5 +126,5 @@ if __name__ == '__main__':
     plt.figure(figsize=(30, 30))  # larger, better quality
     plt.imshow(back + frnt + mask_pic_3)
     plt.axis("off")
-    plt.savefig("word_graph_back.png")
+    plt.savefig("word_graph1.png")
     plt.close()
