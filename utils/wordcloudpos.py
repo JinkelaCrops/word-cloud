@@ -93,7 +93,7 @@ class WordCloudPos(WordCloud):
                 # we only have one word. We make it big!
                 font_size = self.height
             else:
-                self.generate_from_frequencies_positions(dict(frequencies[:2]), positions,
+                self.generate_from_frequencies_positions(dict(frequencies[:2]), userdefpos,
                                                          max_font_size=self.height)
                 # find font sizes
                 sizes = [x[1] for x in self.layout_]

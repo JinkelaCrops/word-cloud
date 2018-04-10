@@ -30,9 +30,11 @@ def to_rgb(cc):
 
 
 def maxmin_fig(mask):
-    mi = np.min(mask, axis=(0, 1))
-    mx = np.max(mask, axis=(0, 1))
-    mm = (mask - mi) / (mx - mi) * 255
+    mask_mean = np.mean(mask[:, :, :3], axis=2)
+    mi = np.min(mask_mean, axis=(0, 1))
+    mx = np.max(mask_mean, axis=(0, 1))
+    mm = (mask_mean - mi) / (mx - mi) * 255
+    mm = np.array([mm] * 3).transpose((1, 2, 0))
     return mm.astype("uint8")
 
 
@@ -78,7 +80,7 @@ class gen_items:
 
 if __name__ == '__main__':
     font_path = "./fonts/Griffy-Regular.ttf"
-    mask_path = "./backgrounds/cat.png"
+    mask_path = "./backgrounds/catoon_cat.png"
     with open("./text/YiCAT词云参数.txt", "r", encoding="utf8") as f:
         params = f.readlines()
     p_dict = {}
@@ -96,16 +98,17 @@ if __name__ == '__main__':
     mask_origin = np.array(Image.open(mask_path))
     mask_pic = mask_origin[:, :, :3]
     # mask resize
-    mask_less = cv2.resize(mask_pic, (mask_pic.shape[1] * 8, mask_pic.shape[0] * 8))  # resize mask
-    mask_less = maxmin_fig(mask_less)
-    mask_less = 255 - square_fig(255 - mask_less)
+    mask_size = (5000, 5000)
+    pad_size = 100
+    mask_less = maxmin_fig(mask_pic)
+    mask_less = 255 - square_fig(mask_less)
+    mask_less = cv2.resize(mask_less, np.array(mask_size) - pad_size)  # resize mask
     # maskmore and maskless,
     # maskmore(mask_more) is the background, maskless(mask_less) is the wordcloud
-    pad_size = 100
     mar = int(pad_size / 2)
     mask_more = cv2.resize(mask_less, (mask_less.shape[1] + pad_size, mask_less.shape[0] + pad_size))
     mask_less = cv2.dilate(mask_more, np.ones((mar, mar), np.uint8), iterations=1)
-    mask_transparent = cv2.resize(square_fig(mask_origin), (mask_more.shape[1], mask_more.shape[0]))[:, :, 3]
+    # mask_transparent = cv2.resize(square_fig(mask_origin), (mask_more.shape[1], mask_more.shape[0]))[:, :, 3]
 
     wc = WordCloudPos(font_path=font_path,
                       prefer_horizontal=1,
@@ -118,7 +121,8 @@ if __name__ == '__main__':
                       )
 
     # user defined position
-    userdefpos = {"English": (2211, 3059), "Chinese": (1916, 3878)}
+    # userdefpos = {"English": (2211, 3059), "Chinese": (1916, 3878)}
+    userdefpos = {}
 
     # replacement for p_dict.index
     wc.set_word_replace("\u0000")
@@ -141,8 +145,8 @@ if __name__ == '__main__':
     # plot
     plt.figure(figsize=(30, 30))  # larger, better quality
     bmp_fig = back + frnt + mask_more
-    png_fig = np.array([*bmp_fig.transpose((2, 0, 1)), mask_transparent]).transpose((1, 2, 0))
-    plt.imshow(png_fig)
+    # png_fig = np.array([*bmp_fig.transpose((2, 0, 1)), mask_transparent]).transpose((1, 2, 0))
+    plt.imshow(bmp_fig)
     plt.axis("off")
     plt.savefig("word_graph1.png")
     plt.close()
